@@ -1,6 +1,6 @@
 import { useAuth } from './contexts/AuthContext';
 import LoginPage from './pages/LoginPage';
-import DashboardPage from './pages/DashboardPage';
+import DashboardPageWithTabs from './pages/DashboardPageWithTabs';
 
 function App() {
   const { user, loading } = useAuth();
@@ -13,7 +13,7 @@ function App() {
     );
   }
 
-  return user ? <DashboardPage /> : <LoginPage />;
+  return user ? <DashboardPageWithTabs /> : <LoginPage />;
 }
 
 export default App;

@@ -8,6 +8,12 @@ import type {
   RecurringTransaction,
   CreateRecurringRequest,
   ConvertToRecurringRequest,
+  PlannedTransaction,
+  Investment,
+  FireSettings,
+  FireProjection,
+  YearlyProjection,
+  UserPreferences,
 } from '../types';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
@@ -96,6 +102,82 @@ export const recurringAPI = {
 
   generate: async (): Promise<void> => {
     await api.post('/recurring/generate');
+  },
+};
+
+// FIRE Planner API
+export const fireAPI = {
+  // Planned Transactions
+  getPlannedTransactions: async (): Promise<PlannedTransaction[]> => {
+    const response = await api.get<{ planned_transactions: PlannedTransaction[] }>('/fire/planned-transactions');
+    return response.data.planned_transactions;
+  },
+
+  createPlannedTransaction: async (data: Partial<PlannedTransaction>): Promise<PlannedTransaction> => {
+    const response = await api.post<{ planned_transaction: PlannedTransaction }>('/fire/planned-transactions', data);
+    return response.data.planned_transaction;
+  },
+
+  updatePlannedTransaction: async (id: number, data: Partial<PlannedTransaction>): Promise<PlannedTransaction> => {
+    const response = await api.put<{ planned_transaction: PlannedTransaction }>(`/fire/planned-transactions/${id}`, data);
+    return response.data.planned_transaction;
+  },
+
+  deletePlannedTransaction: async (id: number): Promise<void> => {
+    await api.delete(`/fire/planned-transactions/${id}`);
+  },
+
+  // Investments
+  getInvestments: async (): Promise<Investment[]> => {
+    const response = await api.get<{ investments: Investment[] }>('/fire/investments');
+    return response.data.investments;
+  },
+
+  createInvestment: async (data: Partial<Investment>): Promise<Investment> => {
+    const response = await api.post<{ investment: Investment }>('/fire/investments', data);
+    return response.data.investment;
+  },
+
+  updateInvestment: async (id: number, data: Partial<Investment>): Promise<Investment> => {
+    const response = await api.put<{ investment: Investment }>(`/fire/investments/${id}`, data);
+    return response.data.investment;
+  },
+
+  deleteInvestment: async (id: number): Promise<void> => {
+    await api.delete(`/fire/investments/${id}`);
+  },
+
+  // Settings
+  getSettings: async (): Promise<FireSettings> => {
+    const response = await api.get<{ settings: FireSettings }>('/fire/settings');
+    return response.data.settings;
+  },
+
+  updateSettings: async (data: Partial<FireSettings>): Promise<FireSettings> => {
+    const response = await api.put<{ settings: FireSettings }>('/fire/settings', data);
+    return response.data.settings;
+  },
+
+  // Projections
+  getProjection: async (): Promise<FireProjection> => {
+    const response = await api.get<{ projection: FireProjection }>('/fire/projection');
+    return response.data.projection;
+  },
+
+  getYearlyProjections: async (years: number = 40): Promise<YearlyProjection[]> => {
+    const response = await api.get<{ projections: YearlyProjection[] }>(`/fire/projection/yearly?years=${years}`);
+    return response.data.projections;
+  },
+
+  // Preferences
+  getPreferences: async (): Promise<UserPreferences> => {
+    const response = await api.get<{ preferences: UserPreferences }>('/fire/preferences');
+    return response.data.preferences;
+  },
+
+  updatePreferences: async (data: Partial<UserPreferences>): Promise<UserPreferences> => {
+    const response = await api.put<{ preferences: UserPreferences }>('/fire/preferences', data);
+    return response.data.preferences;
   },
 };
 
