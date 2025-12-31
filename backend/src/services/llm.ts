@@ -84,6 +84,42 @@ export async function parseTransactionText(text: string): Promise<ParsedTransact
   }
 }
 
+export async function categorizeMerchant(merchant: string): Promise<string> {
+  try {
+    const response = await axios.post(
+      LLM_API_URL,
+      {
+        model: LLM_MODEL,
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a transaction categorizer. Given a merchant name, determine the most appropriate category. Reply with ONLY one word from this list: food, transport, shopping, entertainment, bills, health, other. No explanation, just the category.'
+          },
+          { role: 'user', content: `Merchant: ${merchant}` }
+        ],
+        temperature: 0.1,
+        max_tokens: 10
+      },
+      {
+        headers: { 'Content-Type': 'application/json' },
+        timeout: 10000
+      }
+    );
+
+    const content = response.data.choices[0]?.message?.content?.toLowerCase().trim();
+    const validCategories = ['food', 'transport', 'shopping', 'entertainment', 'bills', 'health', 'other'];
+
+    if (validCategories.includes(content)) {
+      return content;
+    }
+
+    return 'other';
+  } catch (error) {
+    console.error('LLM categorization error:', error);
+    return 'other';
+  }
+}
+
 export async function isFinancialNotification(notificationText: string): Promise<boolean> {
   try {
     const response = await axios.post(

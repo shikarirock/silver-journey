@@ -3,6 +3,7 @@ import { format } from 'date-fns';
 import type { Transaction } from '../types';
 import { transactionsAPI } from '../services/api';
 import EditTransactionModal from './EditTransactionModal';
+import ConvertToRecurringModal from './ConvertToRecurringModal';
 
 interface TransactionListProps {
   transactions: Transaction[];
@@ -23,6 +24,7 @@ const categoryColors: Record<string, string> = {
 const sourceIcons: Record<string, string> = {
   manual: '✍️',
   notification: '📱',
+  recurring: '🔄',
 };
 
 export default function TransactionList({
@@ -31,6 +33,7 @@ export default function TransactionList({
   onTransactionDeleted,
 }: TransactionListProps) {
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
+  const [convertingTransaction, setConvertingTransaction] = useState<Transaction | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
   const handleDelete = async (id: number) => {
@@ -76,7 +79,7 @@ export default function TransactionList({
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-lg" title={transaction.source}>
-                        {sourceIcons[transaction.source]}
+                        {sourceIcons[transaction.source] || '💰'}
                       </span>
                       <h3 className="font-semibold text-gray-900">{transaction.merchant}</h3>
                       <span
@@ -86,6 +89,11 @@ export default function TransactionList({
                       >
                         {transaction.category}
                       </span>
+                      {transaction.source === 'recurring' && (
+                        <span className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-800">
+                          Recurring
+                        </span>
+                      )}
                     </div>
                     <p className="text-sm text-gray-600">{transaction.description}</p>
                     <p className="text-xs text-gray-500 mt-1">
@@ -97,20 +105,30 @@ export default function TransactionList({
                     <p className="text-xl font-bold text-gray-900">
                       ${transaction.amount.toFixed(2)}
                     </p>
-                    <div className="flex gap-2 mt-2">
-                      <button
-                        onClick={() => setEditingTransaction(transaction)}
-                        className="text-sm text-primary-600 hover:text-primary-700"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(transaction.id)}
-                        disabled={deletingId === transaction.id}
-                        className="text-sm text-red-600 hover:text-red-700 disabled:opacity-50"
-                      >
-                        {deletingId === transaction.id ? 'Deleting...' : 'Delete'}
-                      </button>
+                    <div className="flex flex-col gap-2 mt-2">
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setEditingTransaction(transaction)}
+                          className="text-sm text-primary-600 hover:text-primary-700"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(transaction.id)}
+                          disabled={deletingId === transaction.id}
+                          className="text-sm text-red-600 hover:text-red-700 disabled:opacity-50"
+                        >
+                          {deletingId === transaction.id ? 'Deleting...' : 'Delete'}
+                        </button>
+                      </div>
+                      {transaction.source !== 'recurring' && !transaction.recurring_transaction_id && (
+                        <button
+                          onClick={() => setConvertingTransaction(transaction)}
+                          className="text-xs text-blue-600 hover:text-blue-700"
+                        >
+                          Make Recurring
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -125,6 +143,17 @@ export default function TransactionList({
           transaction={editingTransaction}
           onClose={() => setEditingTransaction(null)}
           onUpdate={onTransactionUpdated}
+        />
+      )}
+
+      {convertingTransaction && (
+        <ConvertToRecurringModal
+          transaction={convertingTransaction}
+          onClose={() => setConvertingTransaction(null)}
+          onConverted={() => {
+            setConvertingTransaction(null);
+            window.location.reload();
+          }}
         />
       )}
     </>

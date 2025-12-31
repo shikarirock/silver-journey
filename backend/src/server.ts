@@ -5,6 +5,7 @@ import { getDatabase, closeDatabase } from './config/database';
 import authRoutes from './routes/auth';
 import transactionRoutes from './routes/transactions';
 import notificationRoutes from './routes/notifications';
+import recurringRoutes from './routes/recurring';
 
 // Load environment variables
 dotenv.config();
@@ -37,6 +38,7 @@ app.get('/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/recurring', recurringRoutes);
 
 // 404 handler
 app.use((req, res) => {

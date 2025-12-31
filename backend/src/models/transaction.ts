@@ -8,8 +8,10 @@ export interface CreateTransactionData {
   category: string;
   date: string;
   description?: string;
-  source: 'manual' | 'notification';
-  raw_text?: string;
+  source: 'manual' | 'notification' | 'recurring';
+  raw_text?: string | null;
+  is_recurring?: boolean;
+  recurring_transaction_id?: number;
 }
 
 export interface UpdateTransactionData {
@@ -24,8 +26,8 @@ export function createTransaction(data: CreateTransactionData): Transaction {
   const db = getDatabase();
 
   const stmt = db.prepare(`
-    INSERT INTO transactions (user_id, amount, merchant, category, date, description, source, raw_text)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO transactions (user_id, amount, merchant, category, date, description, source, raw_text, is_recurring, recurring_transaction_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
   const result = stmt.run(
@@ -36,7 +38,9 @@ export function createTransaction(data: CreateTransactionData): Transaction {
     data.date,
     data.description || '',
     data.source,
-    data.raw_text || null
+    data.raw_text || null,
+    data.is_recurring ? 1 : 0,
+    data.recurring_transaction_id || null
   );
 
   return getTransactionById(result.lastInsertRowid as number)!;

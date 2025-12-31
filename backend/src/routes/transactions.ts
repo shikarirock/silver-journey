@@ -7,7 +7,7 @@ import {
   updateTransaction,
   deleteTransaction
 } from '../models/transaction';
-import { parseTransactionText } from '../services/llm';
+import { parseTransactionText, categorizeMerchant } from '../services/llm';
 
 const router = Router();
 
@@ -16,6 +16,14 @@ router.use(authenticateToken);
 
 const manualTransactionSchema = z.object({
   text: z.string().min(1)
+});
+
+const directEntrySchema = z.object({
+  amount: z.number().positive(),
+  merchant: z.string().min(1),
+  category: z.string().optional(),
+  date: z.string(),
+  description: z.string().optional()
 });
 
 const updateTransactionSchema = z.object({
@@ -41,7 +49,7 @@ router.get('/', async (req: AuthRequest, res: Response) => {
   }
 });
 
-// Create transaction from manual text input
+// Create transaction from manual text input (natural language)
 router.post('/manual', async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.userId!;
@@ -69,6 +77,41 @@ router.post('/manual', async (req: AuthRequest, res: Response) => {
       return;
     }
     console.error('Manual transaction error:', error);
+    res.status(500).json({ error: 'Failed to create transaction' });
+  }
+});
+
+// Create transaction with direct entry (all fields specified)
+router.post('/direct', async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.userId!;
+    const data = directEntrySchema.parse(req.body);
+
+    // Auto-categorize if category not provided
+    let category = data.category;
+    if (!category) {
+      category = await categorizeMerchant(data.merchant);
+    }
+
+    // Create transaction
+    const transaction = createTransaction({
+      user_id: userId,
+      amount: data.amount,
+      merchant: data.merchant,
+      category,
+      date: data.date,
+      description: data.description,
+      source: 'manual',
+      raw_text: null
+    });
+
+    res.status(201).json({ transaction });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ error: 'Invalid input', details: error.errors });
+      return;
+    }
+    console.error('Direct entry transaction error:', error);
     res.status(500).json({ error: 'Failed to create transaction' });
   }
 });

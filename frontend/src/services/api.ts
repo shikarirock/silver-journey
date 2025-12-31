@@ -1,5 +1,14 @@
 import axios from 'axios';
-import type { AuthResponse, Transaction, CreateTransactionRequest, UpdateTransactionRequest } from '../types';
+import type {
+  AuthResponse,
+  Transaction,
+  CreateTransactionRequest,
+  DirectTransactionRequest,
+  UpdateTransactionRequest,
+  RecurringTransaction,
+  CreateRecurringRequest,
+  ConvertToRecurringRequest,
+} from '../types';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
@@ -44,6 +53,11 @@ export const transactionsAPI = {
     return response.data.transaction;
   },
 
+  createDirect: async (data: DirectTransactionRequest): Promise<Transaction> => {
+    const response = await api.post<{ transaction: Transaction }>('/transactions/direct', data);
+    return response.data.transaction;
+  },
+
   update: async (id: number, data: UpdateTransactionRequest): Promise<Transaction> => {
     const response = await api.put<{ transaction: Transaction }>(`/transactions/${id}`, data);
     return response.data.transaction;
@@ -51,6 +65,37 @@ export const transactionsAPI = {
 
   delete: async (id: number): Promise<void> => {
     await api.delete(`/transactions/${id}`);
+  },
+};
+
+// Recurring Transactions API
+export const recurringAPI = {
+  getAll: async (): Promise<RecurringTransaction[]> => {
+    const response = await api.get<{ recurring_transactions: RecurringTransaction[] }>('/recurring');
+    return response.data.recurring_transactions;
+  },
+
+  create: async (data: CreateRecurringRequest): Promise<RecurringTransaction> => {
+    const response = await api.post<{ recurring_transaction: RecurringTransaction }>('/recurring', data);
+    return response.data.recurring_transaction;
+  },
+
+  convertFromTransaction: async (data: ConvertToRecurringRequest): Promise<any> => {
+    const response = await api.post('/recurring/convert', data);
+    return response.data;
+  },
+
+  update: async (id: number, data: Partial<CreateRecurringRequest>): Promise<RecurringTransaction> => {
+    const response = await api.put<{ recurring_transaction: RecurringTransaction }>(`/recurring/${id}`, data);
+    return response.data.recurring_transaction;
+  },
+
+  delete: async (id: number): Promise<void> => {
+    await api.delete(`/recurring/${id}`);
+  },
+
+  generate: async (): Promise<void> => {
+    await api.post('/recurring/generate');
   },
 };
 

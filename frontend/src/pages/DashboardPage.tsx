@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { transactionsAPI } from '../services/api';
 import type { Transaction } from '../types';
-import AddTransaction from '../components/AddTransaction';
+import AddTransactionTabs from '../components/AddTransactionTabs';
 import TransactionList from '../components/TransactionList';
 
 export default function DashboardPage() {
@@ -66,7 +66,7 @@ export default function DashboardPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-1">
-            <AddTransaction onTransactionAdded={handleTransactionAdded} />
+            <AddTransactionTabs onTransactionAdded={handleTransactionAdded} />
 
             <div className="card mt-6">
               <h3 className="font-semibold mb-2">Mobile App</h3>
