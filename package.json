@@ -1,0 +1,27 @@
+{
+  "name": "financial-tracker",
+  "version": "1.0.0",
+  "description": "Financial tracker with automatic notification parsing and manual transaction input",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend",
+    "mobile"
+  ],
+  "scripts": {
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install && cd ../mobile && npm install",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:mobile": "cd mobile && npm start",
+    "build:backend": "cd backend && npm run build",
+    "build:frontend": "cd frontend && npm run build"
+  },
+  "keywords": [
+    "finance",
+    "tracker",
+    "llm",
+    "notifications"
+  ],
+  "author": "",
+  "license": "MIT"
+}
