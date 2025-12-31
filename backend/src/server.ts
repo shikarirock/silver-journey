@@ -6,6 +6,7 @@ import authRoutes from './routes/auth';
 import transactionRoutes from './routes/transactions';
 import notificationRoutes from './routes/notifications';
 import recurringRoutes from './routes/recurring';
+import fireRoutes from './routes/fire';
 
 // Load environment variables
 dotenv.config();
@@ -39,6 +40,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/recurring', recurringRoutes);
+app.use('/api/fire', fireRoutes);
 
 // 404 handler
 app.use((req, res) => {
